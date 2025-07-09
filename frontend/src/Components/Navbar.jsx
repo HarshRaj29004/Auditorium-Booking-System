@@ -2,10 +2,10 @@
 import Logo from "../assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { userInfo } from "../constants";
 
 const Navbar = ({ home, setHome }) => {
   const navigate = useNavigate();
-  const token = localStorage.getItem("authtoken");
 
   const handleHomeClick = () => {
     navigate("/");
@@ -13,7 +13,7 @@ const Navbar = ({ home, setHome }) => {
   };
 
   const handleBookClick = () => {
-    if (token) {
+    if (userInfo.TOKEN) {
       if (home) {
         navigate("/request");
         setHome(false);
@@ -27,7 +27,7 @@ const Navbar = ({ home, setHome }) => {
   };
 
   const handleAdminClick = () => {
-    if (token) {
+    if (userInfo.TOKEN) {
       localStorage.removeItem("authtoken");
       localStorage.removeItem("role");
       localStorage.removeItem("userData");
@@ -55,7 +55,7 @@ const Navbar = ({ home, setHome }) => {
         </div>
         <div className="flex gap-3 justify-center items-center">
           {/* Home option always visible when not logged in */}
-          {!token ? (
+          {!userInfo.TOKEN ? (
             <p
               className="NAV px-0 pb-0 font-semibold translate-x-[-10px] flex justify-center max-sm:translate-x-[-20px] items-center pt-4 cursor-pointer"
               onClick={handleHomeClick}
@@ -81,7 +81,7 @@ const Navbar = ({ home, setHome }) => {
             className="bg-slate-800 hover:bg-transparent hover:text-black font-semibold hover:border-black hover:border-solid hover:border-[1.5px] outline-none text-white rounded-[120px] px-3 w-[120px] h-[50px] max-sm:w-[80px] max-sm:h-[40px] flex justify-center items-center py-4 max-sm:py-3 max-sm:flex max-sm:justify-between max-sm:items-center"
             onClick={handleAdminClick}
           >
-            {token ? "LogOut" : "Admin"}
+            {userInfo.TOKEN ? "LogOut" : "Admin"}
           </button>
         </div>
       </div>

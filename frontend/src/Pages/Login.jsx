@@ -54,7 +54,7 @@ function Userlogin() {
   
     setLoading(true);
     try {
-      const res = await axios.post(`${import.meta.env.BACKEND}/auth/login`, {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND}/auth/login`, {
         email,
         password,
       }, {
@@ -65,20 +65,20 @@ function Userlogin() {
         timeout: 10000
       });
   
-      const { token, role,user } = res.data;
+      const { user } = res.data;
       console.log(res.data);
       
       setLoginAttempts(5);
   
       // Secure token storage
-      localStorage.setItem("authtoken", token);
+      localStorage.setItem("authtoken", user.accessToken);
       localStorage.setItem("userEmail", user.email);
-      localStorage.setItem("role", role);
-      localStorage.setItem("name", user.username);
+      localStorage.setItem("role", user.role);
+      localStorage.setItem("name", user.name);
   
       setPassword("");
       toast.success("Login successful!");
-      navigate("/viewrequest" , role);
+      navigate("/viewrequest" , user.role);
     } catch (err) {
       // Increment login attempts
       setLoginAttempts(prev => prev + 1);

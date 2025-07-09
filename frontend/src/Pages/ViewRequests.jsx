@@ -1,4 +1,4 @@
-import { React, useEffect, useState } from "react";
+import { React, useEffect, useState, useMemo } from "react";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import {
   useReactTable,
@@ -11,6 +11,7 @@ import Footer from "../Components/Footer";
 import Spinner from "../Components/Spinner";
 import Popup from "../Components/Popup";
 import { FaArrowRight } from "react-icons/fa";
+import { Role, RequestStatus, RequestType, userInfo } from '../constants';
 
 export default function ViewRequests() {
   const [tickets, setTickets] = useState([]);
@@ -18,13 +19,10 @@ export default function ViewRequests() {
     fetchData();
   }, []);
   const [updatestatusid, setUpdatestatusid] = useState("");
-  const [activeButton, setActiveButton] = useState("pending");
+  const [activeButton, setActiveButton] = useState(RequestStatus.PENDING);
   const [loading, setloading] = useState(false);
-  // const [showupdatestatus, setShowupdatestatus] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const userRole = localStorage.getItem("role");
-  const userId = localStorage.getItem("userEmail");
   // console.log(userRole);
 
   const openPopup = () => {
@@ -37,29 +35,23 @@ export default function ViewRequests() {
 
   const fetchData = async () => {
     setloading(true);
-    setActiveButton("pending");
+    setActiveButton(RequestStatus.PENDING);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/ticket?status=pending`
+        `${import.meta.env.VITE_BACKEND}/ticket/fetchTicket?status=${RequestStatus.PENDING}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+        }
       );
       // console.log(tickets);
-      let DisplayData = response.data.filter(ticket => ticket.email === userId);
-
-      if (userRole !== "super-admin" && userRole !== "sub-admin") {
-        setTickets(DisplayData);
-      } else {
-        if (userRole === "sub-admin") {
-          DisplayData = response.data.filter(ticket =>
-            ticket.approvedBy === null && ticket.requestType === "club"
-          );
-          setTickets(DisplayData);
-        } else {
-          // userRole is super-admin
-          DisplayData = response.data.filter(ticket =>
-            ticket.requestType === "teacher" || ticket.approvedBy === "sub-admin"
-          );
-          setTickets(DisplayData);
-        }
+      if (response) {
+        setTickets(response.data);
+      }
+      else {
+        setTickets([])
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -69,18 +61,24 @@ export default function ViewRequests() {
 
   const handleBookedClick = async () => {
     setloading(true);
-    setActiveButton("booked");
+    setActiveButton(RequestStatus.BOOKED);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/ticket?status=booked`
+        `${import.meta.env.VITE_BACKEND}/ticket/fetchTicket?status=${RequestStatus.BOOKED}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+        }
       );
-      let DisplayData = response.data.filter(ticket => ticket.email === userId);
-      console.log(response.data);
+      // console.log(response.data);
 
-      if (userRole !== "super-admin" && userRole !== "sub-admin") {
-        setTickets(DisplayData);
-      } else {
+      if (response) {
         setTickets(response.data);
+      }
+      else {
+        setTickets([])
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -90,29 +88,24 @@ export default function ViewRequests() {
 
   const handlePendingClick = async () => {
     setloading(true);
-    setActiveButton("pending");
+    setActiveButton(RequestStatus.PENDING);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/ticket?status=pending`
-      );
-      // console.log(response.data[0].email);
-      let DisplayData = response.data.filter(ticket => ticket.email === userId);
-
-      if (userRole !== "super-admin" && userRole !== "sub-admin") {
-        setTickets(DisplayData);
-      } else {
-        if (userRole === "sub-admin") {
-          DisplayData = response.data.filter(ticket =>
-            ticket.approvedBy === null && ticket.requestType === "club"
-          );
-          setTickets(DisplayData);
-        } else {
-          // userRole is super-admin
-          DisplayData = response.data.filter(ticket =>
-            ticket.requestType === "teacher" || ticket.approvedBy === "sub-admin"
-          );
-          setTickets(DisplayData);
+        `${import.meta.env.VITE_BACKEND}/ticket/fetchTicket?status=${RequestStatus.PENDING}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.TOKEN}`,
+            'Content-Type': 'application/json',
+          },
         }
+      );
+      // console.log(response.data);
+      // console.log(response);
+      if (response) {
+        setTickets(response.data);
+      }
+      else {
+        setTickets([])
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -122,18 +115,23 @@ export default function ViewRequests() {
 
   const handleDeclinedClick = async () => {
     setloading(true);
-    setActiveButton("declined");
+    setActiveButton(RequestStatus.DECLINED);
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/ticket?status=declined`
+        `${import.meta.env.VITE_BACKEND}/ticket/fetchTicket?status=${RequestStatus.DECLINED}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+        }
       );
       // console.log(response.data);
-      let DisplayData = response.data.filter(ticket => ticket.email === userId);
-
-      if (userRole !== "super-admin" && userRole !== "sub-admin") {
-        setTickets(DisplayData);
-      } else {
+      if (response) {
         setTickets(response.data);
+      }
+      else {
+        setTickets([])
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -142,29 +140,34 @@ export default function ViewRequests() {
   };
 
 
-  const handleClick = async (id, status) => {
+  const handleClick = async (tokenID, tokenStatus) => {
     try {
-      const authtoken = localStorage.getItem("authtoken");
-      if (!authtoken) {
+      if (!userInfo.TOKEN) {
         toast.error("Please login to continue!");
         return;
       }
 
       const response = await axios.put(
-        `${import.meta.env.VITE_BASE_URL}/updateticket/${id}`,
-        { status: status, token: authtoken }
+        `${import.meta.env.VITE_BACKEND}/ticket/updateticket/${tokenID}?new_status=${tokenStatus}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+        }
       );
       if (response) {
-        if (status === "booked") {
+        if (tokenStatus === RequestStatus.BOOKED) {
           toast.success("Booking Request Accepted successfully!");
         }
-        else if (status === "declined") {
+        else if (tokenStatus === RequestStatus.DECLINED) {
           toast.error("Booking Request Declined!");
         }
-        else if (status === "pending") {
+        else if (tokenStatus === RequestStatus.PENDING) {
           toast.success("Booking Request forwarded!");
         } else {
-          toast.error(status);
+          toast.error(tokenStatus);
         }
       }
       await fetchData();
@@ -181,111 +184,107 @@ export default function ViewRequests() {
     return dateString;
   }
 
-  const columns = React.useMemo(
-    () => [
-      {
-        Header: "S.No.",
-        accessor: "id",
-        Cell: ({ row }) => {
-          return <div>{row.index + 1}</div>;
-        },
-      },
-      {
-        Header: "Club Name",
-        accessor: "clubname",
-      },
-      {
-        Header: "Start Time",
-        accessor: "startTime",
-      },
-      {
-        Header: "End Time",
-        accessor: "endTime",
-      },
-      {
-        Header: "Date",
-        accessor: "date",
-        Cell: ({ cell }) => reverseDateFormat(cell.value.slice(0, 10)),
-      },
-      {
-        Header: "Name",
-        accessor: "name",
-      },
-      {
-        Header: "Details",
-        accessor: "details",
-        Cell: ({ row }) => (
-          <div
-            className="flex underline cursor-pointer justify-center bg-blue-500 hover:bg-blue-700 text-white py-1 px-1 rounded"
-            onClick={() => {
-              setSelectedRowData(row.original);
-              openPopup();
-            }}
-          >
-            See more
-          </div>
-        ),
-      },
-      {
-        Header: "Status",
-        accessor: "status",
-        Cell: ({ row }) => (
-          <div className="flex relative gap-4">
-            {userRole === "super-admin" && row.original.status === "pending" && (
-              <>
-                <button
-                  className="accept-button"
-                  onClick={() => handleClick(row.original._id, "booked")}
-                >
-                  <FaCheckCircle className="text-green-500 text-2xl" />
-                </button>
-                <button
-                  className="decline-button"
-                  onClick={() => handleClick(row.original._id, "declined")}
-                >
-                  <FaTimesCircle className="text-red-500 text-2xl" />
-                </button>
-              </>
-            )}
-            {userRole === "sub-admin" && row.original.status === "pending" && (
-              <>
-                <button
-                  className="accept-button"
-                  onClick={() => handleClick(row.original._id, "booked")}
-                >
-                  <FaCheckCircle className="text-green-500 text-2xl" />
-                </button>
-                <button
-                  className="decline-button"
-                  onClick={() => handleClick(row.original._id, "declined")}
-                >
-                  <FaTimesCircle className="text-red-500 text-2xl" />
-                </button>
-                <button
-                  className="forward-button"
-                  onClick={() => handleClick(row.original._id, "forwarded")}
-                >
-                  <FaArrowRight className="text-blue-500 text-2xl" />
-                </button>
-              </>
-            )}
-            {userRole !== "super-admin" && userRole !== "sub-admin" && (
-              <div>{row.original.status}</div>
-            )}
-          </div>
-        ),
-      },
-    ],
-    [updatestatusid, userRole]
-  );
+  const columns = useMemo(() => [
+    {
+      id: "id",
+      header: "S.No.",
+      cell: ({ row }) => <div>{row.index + 1}</div>
+    },
+    {
+      id: "clubname",
+      header: "Club Name",
+      accessorKey: "clubname"
+    },
+    {
+      id: "startTime",
+      header: "Start Time",
+      accessorKey: "startTime"
+    },
+    {
+      id: "endTime",
+      header: "End Time",
+      accessorKey: "endTime"
+    },
+    {
+      id: "date",
+      header: "Date",
+      accessorKey: "date",
+      cell: ({ cell }) => {
+        const rawDate = cell.getValue();
+        if (!rawDate) return "—";
+
+        const date = new Date(rawDate);
+        // console.log(date+" "+rawDate+" "+cell);
+        return isNaN(date) ? "Invalid Date" : reverseDateFormat(date.toISOString().slice(0, 10));
+        // return cell
+      }
+    },
+    {
+      id: "name",
+      header: "Name",
+      accessorKey: "username"
+    },
+    {
+      id: "details",
+      header: "Details",
+      cell: ({ row }) => (
+        <div
+          className="flex underline cursor-pointer justify-center bg-blue-500 hover:bg-blue-700 text-white py-1 px-1 rounded"
+          onClick={() => {
+            setSelectedRowData(row.original);
+            openPopup();
+          }}
+        >
+          See more
+        </div>
+      )
+    },
+    {
+      id: "status",
+      header: "Status",
+      accessorKey: "status",
+      cell: ({ row }) => (
+        <div className="flex relative gap-4">
+          {userInfo.ROLE === Role.SUPERADMIN && row.original.status === RequestStatus.PENDING && (
+            <>
+              <button onClick={() => handleClick(row.original._id, RequestStatus.BOOKED)}>
+                <FaCheckCircle className="text-green-500 text-2xl" />
+              </button>
+              <button onClick={() => handleClick(row.original._id, RequestStatus.DECLINED)}>
+                <FaTimesCircle className="text-red-500 text-2xl" />
+              </button>
+            </>
+          )}
+          {userInfo.ROLE === Role.SUBADMIN && row.original.status === RequestStatus.PENDING && (
+            <>
+              <button onClick={() => handleClick(row.original._id, RequestStatus.BOOKED)}>
+                <FaCheckCircle className="text-green-500 text-2xl" />
+              </button>
+              <button onClick={() => handleClick(row.original._id, RequestStatus.DECLINED)}>
+                <FaTimesCircle className="text-red-500 text-2xl" />
+              </button>
+              <button onClick={() => handleClick(row.original._id, RequestStatus.FORWARD)}>
+                <FaArrowRight className="text-blue-500 text-2xl" />
+              </button>
+            </>
+          )}
+          {(userInfo.ROLE !== Role.SUPERADMIN && userInfo.ROLE !== Role.SUBADMIN) && (
+            <div>{row.original.status}</div>
+          )}
+        </div>
+      )
+    }
+  ], [updatestatusid, userInfo.ROLE]);
+
+
 
   const table = useReactTable({
-    data: tickets,      // your array of data
-    columns: columns,   // your column definitions
+    data: tickets,
+    columns: columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // Add this useEffect to handle body scroll
+
   useEffect(() => {
     if (isPopupOpen) {
       document.body.style.overflow = 'hidden';
@@ -320,14 +319,14 @@ export default function ViewRequests() {
       <div className="mx-8 flex gap-[10px]">
         <button
           onClick={handleBookedClick}
-          className={`rounded-md p-2 shadow-md hover:bg-gray-400 ${activeButton === "booked" ? "bg-slate-800 text-white" : "bg-gray-200"
+          className={`rounded-md p-2 shadow-md hover:bg-gray-400 ${activeButton === RequestStatus.BOOKED ? "bg-slate-800 text-white" : "bg-gray-200"
             }`}
         >
           Booked
         </button>
         <button
           onClick={handlePendingClick}
-          className={`rounded-md p-2 shadow-md hover:bg-gray-400 ${activeButton === "pending"
+          className={`rounded-md p-2 shadow-md hover:bg-gray-400 ${activeButton === RequestStatus.PENDING
             ? "bg-slate-800 text-white"
             : "bg-gray-200"
             }`}
@@ -336,7 +335,7 @@ export default function ViewRequests() {
         </button>
         <button
           onClick={handleDeclinedClick}
-          className={`rounded-md p-2 shadow-md hover:bg-gray-400 ${activeButton === "declined"
+          className={`rounded-md p-2 shadow-md hover:bg-gray-400 ${activeButton === RequestStatus.DECLINED
             ? "bg-slate-800 text-white"
             : "bg-gray-200"
             }`}
@@ -364,16 +363,25 @@ export default function ViewRequests() {
 
           {!loading && (
             <tbody>
-              {table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="transition-colors hover:bg-gray-50">
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="py-3 px-3 text-gray-700">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
+              {!loading && table.getRowModel().rows.length === 0 ? (
+                <tr>
+                  <td colSpan={table.getAllColumns().length} className="text-center py-6 text-gray-500">
+                    No Request Available
+                  </td>
                 </tr>
-              ))}
+              ) : (
+                table.getRowModel().rows.map(row => (
+                  <tr key={row.id} className="transition-colors hover:bg-gray-50">
+                    {row.getVisibleCells().map(cell => (
+                      <td key={cell.id} className="py-3 px-3 text-gray-700">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
             </tbody>
+
           )}
         </table>
       </div>

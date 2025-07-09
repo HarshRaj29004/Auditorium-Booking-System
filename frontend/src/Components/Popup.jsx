@@ -35,33 +35,25 @@ const Popup = ({ data, onClose }) => {
     return new Blob(byteArrays, { type: mimeType });
   }
   const openPdfInNewTab = () => {
-    const dataUrlParts = data.file.split(',');
-    if (dataUrlParts.length === 2) {
-      const pdfBase64 = dataUrlParts[1];
-      const pdfBlob = b64toBlob(pdfBase64, 'application/pdf');
-      const pdfDataUrl = URL.createObjectURL(pdfBlob);
-
-      const newTab = window.open(pdfDataUrl, '_blank');
-
-      if (newTab) {
-        newTab.focus();
-      }
+    const newTab = window.open(data.file, '_blank');
+    if (newTab) {
+      newTab.focus();
     } else {
-      console.error('Invalid Data URL format');
+      console.error('Failed to open new tab');
     }
   };
   //here 
   const columns = React.useMemo(
     () => [
-      { Header: 'Field', accessor: 'field' },
-      { Header: 'Value', accessor: 'value' },
+      { id: 'field', header: 'Field', accessorKey: 'field' },
+      { id: 'value', header: 'Value', accessorKey: 'value' },
     ],
     []
   );
 
   const tableData = React.useMemo(
     () => [
-      { field: 'Name', value: data.name },
+      { field: 'Name', value: data.username },
       { field: 'Email', value: data.email },
       { field: 'Mobile Number', value: data.mobileno },
       { field: 'Event Description', value: data.eventdescription },
@@ -100,8 +92,8 @@ const Popup = ({ data, onClose }) => {
                   <td
                     key={cell.id}
                     className={`p-2 border ${index === 0
-                        ? 'text-left whitespace-nowrap w-1/3 font-semibold overflow-ellipsis h-10'
-                        : 'text-left w-full'
+                      ? 'text-left whitespace-nowrap w-1/3 font-semibold overflow-ellipsis h-10'
+                      : 'text-left w-full'
                       }`}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

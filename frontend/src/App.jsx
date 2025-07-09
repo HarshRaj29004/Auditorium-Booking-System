@@ -1,18 +1,19 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import { BrowserRouter,Route,Routes } from 'react-router-dom'
-import Login from './Pages/Login.jsx'
-import Request from './Pages/Request.jsx'
-import ViewRequests from './Pages/ViewRequests.jsx'
-import Home from './Pages/Home.jsx'
-import { UserProvider } from './Pages/UserProvider.jsx'
+import { useState } from 'react';
+import './App.css';
+import { BrowserRouter,Route,Routes } from 'react-router-dom';
+import Login from './Pages/Login';
+import Request from './Pages/Request';
+import ViewRequests from './Pages/ViewRequests';
+import Home from './Pages/Home';
+import { UserProvider } from './Pages/UserProvider';
+import Navbar from "./Components/Navbar";
 
 function App() {
+  const [home, setHome] = useState(true);
   return (
     <UserProvider>
       <BrowserRouter>
+      <Navbar home={home} setHome={setHome} />
         <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/login' element={<Login />} />

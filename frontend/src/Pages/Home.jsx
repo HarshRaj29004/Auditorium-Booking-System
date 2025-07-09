@@ -5,6 +5,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import Footer from "../Components/Footer";
 import "../assets/calender.css";
+import { Role, RequestStatus, RequestType, userInfo } from '../constants';
 
 const getDaystring = (dayNumber) => {
   const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -52,7 +53,7 @@ const Calender = () => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/ticket?status=booked`);
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND}/ticket/fetchBooked?date=${new Date(selectedDate).toISOString().slice(0, 10)}`);
       const data = response.data.map((item) => ({
         ...item,
         date: new Date(item.date)

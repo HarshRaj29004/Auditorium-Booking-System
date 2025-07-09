@@ -7,6 +7,7 @@ import Select from "@mui/material/Select";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import Footer from "../Components/Footer";
+import { RequestStatus,RequestType,userInfo } from '../constants';
 
 const option = [];
 for (let i = 0; i < 1440; i += 15) {
@@ -36,8 +37,8 @@ function getCurrentDate() {
 
 const AddEvent = () => {
   const [form, setForm] = useState({
-    name: `${localStorage.getItem('name')}`,
-    email: `${localStorage.getItem('userEmail')}`,
+    name: userInfo.NAME,
+    email: userInfo.EMAIL,
     mobileno: "",
     eventdescription: "",
     date: "",
@@ -45,7 +46,7 @@ const AddEvent = () => {
     requestType: "",
     startTime: 0,
     endTime: 15,
-    status: "pending",
+    status: RequestStatus.PENDING,
   });
   const [bookedSlots, setBookedSlots] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -61,7 +62,13 @@ const AddEvent = () => {
   const fetchBookedSlots = async (date) => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/ticket?date=${date}&status=booked`
+        `${import.meta.env.VITE_BACKEND}/ticket/fetchTicket?date=${date}&status=${RequestStatus.BOOKED}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+        }
       );
 
       // Convert booked slots to minutes for easy comparison
@@ -146,7 +153,7 @@ const AddEvent = () => {
     if (!form.requestType) validationErrors.push("Request type is required");
 
     // Club name validation (conditional)
-    if (form.requestType === 'club' && form.clubname.trim() === '') {
+    if (form.requestType === RequestType.CLUB && form.clubname.trim() === '') {
       validationErrors.push("Club name is required for club booking");
     }
 
@@ -171,7 +178,7 @@ const AddEvent = () => {
     formData.append('mobileno', form.mobileno);
     formData.append('eventdescription', form.eventdescription.toLowerCase());
     formData.append('date', form.date);
-    if (form.requestType === 'club') {
+    if (form.requestType === RequestType.CLUB) {
       formData.append('clubname', form.clubname);
     }
     formData.append('requestType', form.requestType);
@@ -181,12 +188,17 @@ const AddEvent = () => {
     console.log("hello");
     for (let pair of formData.entries()) {
       console.log(pair[0] + ': ' + pair[1]);
-    }    
-    
+    }
+
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/createticket`,
-        formData
+        `${import.meta.env.VITE_BACKEND}/ticket/createticket`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.TOKEN}`
+          }
+        }
       );
       // Show success toast
       toast.success("Booking Request sent successfully!");
@@ -305,8 +317,8 @@ const AddEvent = () => {
                       <input
                         type="radio"
                         name="bookingType"
-                        value="club"
-                        checked={form.requestType === 'club'}
+                        value={RequestType.CLUB}
+                        checked={form.requestType === RequestType.CLUB}
                         onChange={(e) => setForm({ ...form, requestType: e.target.value })}
                         className="mr-2"
                       />
@@ -316,8 +328,8 @@ const AddEvent = () => {
                       <input
                         type="radio"
                         name="bookingType"
-                        value="teacher"
-                        checked={form.requestType === 'teacher'}
+                        value={RequestType.TEACHER}
+                        checked={form.requestType === RequestType.TEACHER}
                         onChange={(e) => setForm({ ...form, requestType: e.target.value })}
                         className="mr-2"
                       />
@@ -325,7 +337,7 @@ const AddEvent = () => {
                     </label>
                   </div>
                 </div>
-                {form.requestType === 'club' && (
+                {form.requestType === RequestType.CLUB && (
                   <div className="flex flex-row justify-between my-3 gap-7 w-[350px]">
                     <label className="font-semibold">Club Name</label>
                     <input
@@ -360,14 +372,17 @@ const AddEvent = () => {
               </form>
             </div>
 
-            <div className="flex flex-row justify-between my-3 gap-7 w-[350px]">
+            <div className="flex flex-col gap-2 my-3 w-[350px]">
+              <label htmlFor="description" className="text-sm font-medium text-gray-700">
+                Event Description <span className="text-red-500">*</span>
+              </label>
               <textarea
+                id="description"
                 name="Description"
-                cols="30"
                 required
                 rows="4"
-                className="rounded-lg p-5 outline-none resize-none h-full w-full"
-                placeholder="Enter Description"
+                className="rounded-xl p-4 text-sm text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-300 resize-none w-full min-h-[120px] shadow-sm placeholder-gray-400"
+                placeholder="Enter description..."
                 value={form.eventdescription}
                 onChange={(e) => {
                   setForm({ ...form, eventdescription: e.target.value });
