@@ -59,7 +59,7 @@ const Popup = ({ data, onClose }) => {
       { field: 'Event Description', value: data.eventdescription },
       { field: 'Date', value: formatDate(data.date) },
       { field: 'Club Name', value: data.clubname },
-      { field: 'Approved By', value: data.approve },
+      { field: 'Approved By', value: data.approvedBy },
       { field: 'Start Time', value: data.startTime },
       { field: 'End Time', value: data.endTime },
       { field: 'Current Status', value: data.status },

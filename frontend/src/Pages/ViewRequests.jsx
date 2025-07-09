@@ -268,9 +268,7 @@ export default function ViewRequests() {
               </button>
             </>
           )}
-          {(userInfo.ROLE !== Role.SUPERADMIN && userInfo.ROLE !== Role.SUBADMIN) && (
-            <div>{row.original.status}</div>
-          )}
+          <div>{row.original.status}</div>
         </div>
       )
     }

@@ -42,7 +42,7 @@ async def update_ticket_status(
     new_status: ReqStatus,
     user=Depends(jwt_required)
 ):
-    return await UpdateFormStatus(ticket_id, new_status, user["_id"])
+    return await UpdateFormStatus(ticket_id, new_status, user)
 
 
 # ✅ Fetch tickets

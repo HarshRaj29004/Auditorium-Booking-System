@@ -55,7 +55,7 @@ async def CreateTicket(body, file,user_id):
 
 
 # Update Ticket Status
-async def UpdateFormStatus(ticket_id: str, new_status: ReqStatus,user_id):
+async def UpdateFormStatus(ticket_id: str, new_status: ReqStatus,user):
     try:
         try:
             object_id = ObjectId(ticket_id)
@@ -67,11 +67,12 @@ async def UpdateFormStatus(ticket_id: str, new_status: ReqStatus,user_id):
             raise HTTPException(status_code=404, detail="Form (ticket) not found")
 
         # update logic here
+        # print(user)
         db["Ticket"].update_one(
             { "_id": object_id },
             { "$set": {
                 "status": new_status,
-                "approvedBy": user_id
+                "approvedBy": user['email']
             }}
         )
 
@@ -90,7 +91,7 @@ async def FetchTickets(user, selected_date=None, status=None):
 
         query = {}
         
-        if status == ReqStatus.BOOKED.value:
+        if (status == ReqStatus.BOOKED.value) or (status == ReqStatus.DECLINED.value):
             query['status'] = status
         else:
             if user["role"] == role.SUBADMIN.value:
@@ -107,7 +108,7 @@ async def FetchTickets(user, selected_date=None, status=None):
                 query["date"] = str(selected_date)
 
         tickets = list(db["Ticket"].find(query))
-        print("Tickets:", tickets)
+        # print("Tickets:", tickets)
 
         return jsonable_encoder(
             tickets,

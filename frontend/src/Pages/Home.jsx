@@ -97,21 +97,27 @@ const Calender = () => {
       <div className="min-h-screen bg-gray-50">
         <div className="flex flex-col md:flex-row p-4 max-w-7xl mx-auto">
           {/* Left side - Mini Calendar */}
-          <div className="md:w-1/4 mb-6 md:mb-0">
+          <div className="w-full md:w-1/4 mb-6 md:mb-0">
             <div className="bg-white rounded-lg shadow-md p-4 md:sticky md:top-4">
               <h2 className="text-xl font-semibold mb-4 text-gray-800">Select Date</h2>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateCalendar
-                  value={selectedDate}
-                  onChange={handleDateChange}
-                  showDaysOutsideCurrentMonth={false} // equivalent to showNeighboringMonth={false}
-                  slots={{
-                    leftArrowIcon: () => null,  // remove prev2Label
-                    rightArrowIcon: () => null, // remove next2Label
-                  }}
-                  sx={{ border: 0 }} // equivalent to className="border-0"
-                />
-              </LocalizationProvider>
+              <div className="w-full overflow-x-auto">
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DateCalendar
+                    value={selectedDate}
+                    onChange={handleDateChange}
+                    showDaysOutsideCurrentMonth={false}
+                    slots={{
+                      leftArrowIcon: () => null,
+                      rightArrowIcon: () => null,
+                    }}
+                    sx={{
+                      border: 0,
+                      width: "100%",
+                      maxWidth: "100%",
+                    }}
+                  />
+                </LocalizationProvider>
+              </div>
               <div className="mt-4 text-center">
                 <p className="text-gray-600">
                   Selected: <span className="font-medium">{selectedDate.toDateString()}</span>
